@@ -18,7 +18,9 @@ public:
 
     int connectInterface();
     QString getPairedDevices();
+    void pairDevice(QString addressString);
     void quitPython();
+
 
 
 private:

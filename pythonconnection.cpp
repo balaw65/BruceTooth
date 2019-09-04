@@ -51,6 +51,11 @@ QString PythonConnection::getPairedDevices()
    }
    return QString("");
 }
+void PythonConnection::pairDevice(QString addressString)
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__ << ":" << addressString;
+    m_iface->call("PairDevice", addressString);
+}
 
 void PythonConnection::quitPython()
 {

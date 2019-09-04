@@ -25,6 +25,10 @@ public:
     void pairingFailed();
     void pairingSucceeded();
 
+
+    void unPairingFailed();
+    void unPairingSucceeded();
+
 private slots:
     void scanButtonPressed();
     void pairButtonPressed();

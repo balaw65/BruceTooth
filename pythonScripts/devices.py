@@ -16,6 +16,18 @@ class Devices:
    bus             = SystemBus()
 
 
+   def pairDevice(self, addressString):
+
+      objMgr = ObjectManager()
+      devices = objMgr.GetAddresses()
+
+      print "Attempting to find %s" % addressString
+      print devices[addressString]
+      # Form new string:
+      newPath = "/org/bluez/hci0/dev_%s" % (devices[addressString].replace(':','_'))
+      print "New Path: |%s|" % newPath
+
+ 
    def returnPairedDevices(self):
 
       # Find all devices that are paired:

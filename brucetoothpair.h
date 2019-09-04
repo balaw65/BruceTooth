@@ -16,13 +16,18 @@ public:
 
     QString getAddressOfLocalDevice(); //Ok
     int  list(); // Ok
-    //void pairDevice(QString atAddress);
+    void unPairDevice(QString atAddress);
+
     void scanOn(); // Ok
     void setMainWindow(MainWindow * mw); // Ok
 
 
 public slots:
     void scanFinished(); // Ok
+    void pairingUnpairingDone(
+              const QBluetoothAddress&,
+              QBluetoothLocalDevice::Pairing);
+
 
 
 private slots:

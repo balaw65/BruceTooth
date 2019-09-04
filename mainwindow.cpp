@@ -87,13 +87,15 @@ void MainWindow::pairButtonPressed()
     qDebug() << "Pair Button Pressed, attempting to pair device at address |" << m_selectedDevicesAddress << "|";
     ui->pairButton->setEnabled(false);
     ui->foundDevicesListWidget->setEnabled(false);
-    this->setCursor(Qt::WaitCursor);
+    m_pythonConnection->pairDevice(m_selectedDevicesAddress);
+    //this->setCursor(Qt::WaitCursor);
     //m_bt.pairDevice(m_selectedDevicesAddress);
 }
 void MainWindow::unpairButtonPressed()
 {
      qDebug() << "UnPair Button Pressed, attempting to unpair device at address |" <<
                  m_pairedDeviceAddress << "|";
+     m_bt.unPairDevice(m_pairedDeviceAddress);
 }
 void MainWindow::pairingFailed()
 {
@@ -106,6 +108,24 @@ void MainWindow::pairingSucceeded()
 {
 
 }
+void MainWindow::unPairingFailed()
+{
+    qDebug() << "Un-pairing attempt failed";
+    ui->pairedDeviceAddress->setText("PAIRING FAILED");
+    this->setCursor(Qt::ArrowCursor);
+    ui->pairButton->setEnabled(true);
+
+}
+void MainWindow::unPairingSucceeded()
+{
+    qDebug() << "Un-pairing attempt successful";
+    ui->pairButton->setEnabled(true);
+    ui->unPairButton->setEnabled(false);
+    m_pairedDeviceAddress = "";
+    ui->pairedDeviceAddress->setText("NOTHING PAIRED");
+
+}
+
 void MainWindow::addADiscoveredDevice(QString address, QString name, QBluetoothLocalDevice::Pairing paired)
 {
    QString item = "";
@@ -182,6 +202,5 @@ void MainWindow::quitPython()
 void MainWindow::testButtonPressed()
 {
    qDebug() << "TEST BUTTON PRESSED";
-   qDebug() << "Python get paired devices returns:  " << m_pythonConnection->getPairedDevices();
-
+   m_pythonConnection->pairDevice("00:0D:16:31:41:09");
 }

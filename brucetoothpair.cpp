@@ -12,23 +12,49 @@ BruceToothPair::BruceToothPair(QObject *parent) : QObject(parent)
    m_pairFailCount = 0;
    m_btNumberOfPairedDevices = 0;
    m_localDevice = new QBluetoothLocalDevice;
+
+
 }
 int BruceToothPair::list()
 {
-    int i = 1;
-    foreach (QBluetoothHostInfo localHostInfoDevice, m_localDevice->allDevices())
-    {
-       qDebug() << "Local " << i << " Name:    " << localHostInfoDevice.name();
-       qDebug() << "Local " << i << " Address: " << localHostInfoDevice.address();
-       i++;
-    }
-    if ( m_localDevice->allDevices().count() == 1 )
-       qDebug() << m_localDevice->address();
+   int i = 1;
+   foreach (QBluetoothHostInfo localHostInfoDevice, m_localDevice->allDevices())
+   {
+      qDebug() << "Local " << i << " Name:    " << localHostInfoDevice.name();
+      qDebug() << "Local " << i << " Address: " << localHostInfoDevice.address();
+      i++;
+   }
+   if ( m_localDevice->allDevices().count() == 1 )
+   {
+      qDebug() << m_localDevice->address();
+      connect(m_localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing)), this, SLOT(pairingUnpairingDone(const QBluetoothAddress &,QBluetoothLocalDevice::Pairing)));
+
+   }
    return m_localDevice->allDevices().count();
 }
+void BruceToothPair::pairingUnpairingDone(
+              const QBluetoothAddress& address,
+              QBluetoothLocalDevice::Pairing pairing)
+{
+    switch (pairing)
+    {
+        case QBluetoothLocalDevice::Paired:
+           qDebug() << "Local Device " << address.toString() << " Paired" << endl;
+           break;
+        case QBluetoothLocalDevice::AuthorizedPaired:
+           qDebug() << "Local Device " << address.toString() << " Authorized Paired" << endl;
+           break;
+        case QBluetoothLocalDevice::Unpaired:
+           qDebug() << "Local Device " << address.toString() << " Un-Paired" << endl;
+           m_mainWindow->unPairingSucceeded();
+           break;
+
+    }
+}
+
 void BruceToothPair::scanOn()
 {
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
+   qDebug() << __FILE__ << ":" << __FUNCTION__;
    m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent();
    powerOff();
    powerOn();
@@ -88,8 +114,8 @@ void BruceToothPair::serviceDiscoveryFinished()
 }
 void BruceToothPair::deviceFound(QBluetoothDeviceInfo info)
 {
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-   qDebug() << "Device Found:  " << info.address();
+   qDebug() << __FILE__ << ":" << __FUNCTION__;
+   qDebug() << "===>Device Found:  " << info.address();
    if (m_mainWindow != nullptr)
    {
        m_mainWindow->addAScannedDevice(info.address().toString(), info.name());
@@ -120,6 +146,18 @@ QString BruceToothPair::getAddressOfLocalDevice()
 {
     return m_localDevice->address().toString();
 }
+
+
+void BruceToothPair::unPairDevice(QString atAddress)
+{
+   /* First, find paired devices: */
+   m_btPairedDevicesAddress = QBluetoothAddress(atAddress);
+
+   m_localDevice->requestPairing(m_btPairedDevicesAddress, QBluetoothLocalDevice::Unpaired);
+
+
+}
+
 #if 0
 void BruceToothPair::displayPin(const QBluetoothAddress &address, QString pin)
 {

@@ -20,6 +20,9 @@ class Session(object):
             <method name='GetPairedDevices'>
                <arg type='as' name='response' direction='out'/>
             </method>
+            <method name='PairDevice'>
+               <arg type='s' name='s' direction='in'/>
+            </method>
             <method name='Quit'/>
             <property name="SomeProperty" type="s" access="readwrite">
                <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
@@ -31,6 +34,7 @@ class Session(object):
    def EchoString(self, s):
       """returns whatever is passed to it"""
       return s
+
    def GetPairedDevices(a):
       """returns all devices paired to the local interface"""
       devices = Devices()
@@ -39,20 +43,12 @@ class Session(object):
       for pDevice in a:
          print pDevice
 
-
       return a
 
-
-#     pairedDevices = devices.returnPairedDevices()
-
-#     s = ""
-#     if len(pairedDevices) > 0:
-#        for pDevice in pairedDevices:
-#           s += pDevice + '|'
-#     else:
-#        s = "None"
-
-#     return s
+   def PairDevice(self, s):
+      print ("Attempting to pair device at address: %s" % s)
+      devices = Devices()
+      devices.pairDevice(s)
 
 
 
