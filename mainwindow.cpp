@@ -25,9 +25,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pairButton->setEnabled(false);
     ui->unPairButton->setEnabled(false);
     if (usePython)
-       ui->pairedDeviceAddress->setText(m_pythonConnection->getPairedDevices());
+    {
+       m_pairedDeviceAddress = m_pythonConnection->getPairedDevices();
+       ui->pairedDeviceAddress->setText(m_pairedDeviceAddress);
+       if (m_pairedDeviceAddress.split(":").count() == 6)
+         ui->unPairButton->setEnabled(true);
+    }
     else
+    {
+       //m_pythonConnection->getPairedDevices()
+       m_pairedDeviceAddress = "UNKNOWN";
        ui->pairedDeviceAddress->setText("UNKNOWN");
+    }
 
     /* List local devices: */
     int numberOfLocalDevices = m_bt.list();
@@ -48,11 +57,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->scanButton->setEnabled(true);
     }
 
-    connect(ui->scanButton, SIGNAL(clicked()), this, SLOT(scanButtonPressed()));
-    connect(ui->pairButton, SIGNAL(clicked()), this, SLOT(pairButtonPressed()));
+    connect(ui->scanButton,   SIGNAL(clicked()), this, SLOT(scanButtonPressed()));
+    connect(ui->pairButton,   SIGNAL(clicked()), this, SLOT(pairButtonPressed()));
+    connect(ui->unPairButton, SIGNAL(clicked()), this, SLOT(unpairButtonPressed()));
+
     connect(ui->discoveredDevicesListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(discoveredDeviceSelected()));
+
     connect(ui->quitPythonButton, SIGNAL(clicked()), this, SLOT(quitPython()));
-    connect(ui->testPushButton, SIGNAL(clicked()), this, SLOT(testButtonPressed()));
+    connect(ui->testPushButton,   SIGNAL(clicked()), this, SLOT(testButtonPressed()));
 }
 
 MainWindow::~MainWindow()
@@ -77,6 +89,11 @@ void MainWindow::pairButtonPressed()
     ui->foundDevicesListWidget->setEnabled(false);
     this->setCursor(Qt::WaitCursor);
     //m_bt.pairDevice(m_selectedDevicesAddress);
+}
+void MainWindow::unpairButtonPressed()
+{
+     qDebug() << "UnPair Button Pressed, attempting to unpair device at address |" <<
+                 m_pairedDeviceAddress << "|";
 }
 void MainWindow::pairingFailed()
 {

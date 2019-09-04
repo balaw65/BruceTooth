@@ -28,6 +28,7 @@ public:
 private slots:
     void scanButtonPressed();
     void pairButtonPressed();
+    void unpairButtonPressed();
     void discoveredDeviceSelected();
     void quitPython();
     void testButtonPressed();
@@ -38,6 +39,7 @@ private:
     BruceToothPair m_bt;
     PythonConnection * m_pythonConnection;
     QString m_selectedDevicesAddress;
+    QString m_pairedDeviceAddress;
 
 };
 
