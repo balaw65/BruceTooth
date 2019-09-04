@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 
-QT       += core bluetooth gui
+QT       += core bluetooth gui dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,11 +28,13 @@ CONFIG += c++11
 SOURCES += \
         brucetoothpair.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        pythonconnection.cpp
 
 HEADERS += \
         brucetoothpair.h \
-        mainwindow.h
+        mainwindow.h \
+        pythonconnection.h
 
 FORMS += \
         mainwindow.ui

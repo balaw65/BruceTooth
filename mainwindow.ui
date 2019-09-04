@@ -177,6 +177,32 @@
      <string>Un-Pair Device</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="quitPythonButton">
+    <property name="geometry">
+     <rect>
+      <x>488</x>
+      <y>0</y>
+      <width>141</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quit Python</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="testPushButton">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>30</y>
+      <width>141</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Test Button</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

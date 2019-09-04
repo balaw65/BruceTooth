@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "brucetoothpair.h"
+#include "pythonconnection.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,11 +29,14 @@ private slots:
     void scanButtonPressed();
     void pairButtonPressed();
     void discoveredDeviceSelected();
+    void quitPython();
+    void testButtonPressed();
 
 private:
     Ui::MainWindow *ui;
 
     BruceToothPair m_bt;
+    PythonConnection * m_pythonConnection;
     QString m_selectedDevicesAddress;
 
 };

@@ -4,6 +4,7 @@ from pydbus import SystemBus
 from properties import Properties
 import dbus
 import re
+import time
 
 
 class BluezAdapter1:
@@ -34,26 +35,34 @@ class BluezAdapter1:
          else:
             print("Unable to remove device")
 
-   def ScanForDevices(self);
+   def ScanForDevices(self):
       props = Properties()
 
       # Power off:
+      print "Powering off..."
       props.PowerOff()
+
+      time.sleep(5)
 
 
       # Power on:
+      print "Powering back on..."
       props.PowerOn()
 
 
       adapter1 = self.bus.get(self.busName, self.path)
       adapter1.StartDiscovery()
-      for (i in range(10,0,-1)):
+      for i in range(10,0,-1):
          print(i)
          time.sleep(1)
 
       # List devices:
       objMgr = ObjectManager()
-      objMgr.ListDevices()
+      # objMgr.ListDevices()
+      # List addresses:
+      devices = objMgr.GetAddresses()
+      for address in devices:
+         print "%s\t%s" % (address, devices[address]['Name'])
       
 
 

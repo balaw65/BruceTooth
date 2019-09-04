@@ -38,9 +38,27 @@ class ObjectManager(MyBluez):
 
    def ListDevices(self):
       managedObjects = self.bus.get(self.busName, self.path)
+      devicesDick = managedObjects.GetManagedObjects()
 
-      for key in managedObjects.GetManagedObjects():
+      for key in devicesDick:
          print key
+               
+   def GetAddresses(self):
+      managedObjects = self.bus.get(self.busName, self.path)
+      devicesDick = managedObjects.GetManagedObjects()
+      devices = {}
+      # addresses = []
+
+      for key in devicesDick:
+         if len(key.split('/')) == 5:
+            if key.find('/org/bluez/hci0/dev_') != -1:
+               # addresses.append(devicesDick[key]['org.bluez.Device1']['Address'])
+               addressKey = devicesDick[key]['org.bluez.Device1']['Address']
+               devices[addressKey]  = devicesDick[key]['org.bluez.Device1']
+
+      return devices
+               
+
 
      
       
@@ -54,7 +72,8 @@ if __name__ == '__main__':
    mgtObjects = ObjectManager()
    mgtObjects.GetManagedObjects()
    mgtObjects.DisplayDBusReturnValue()
-   # mgtObjects.ListDevices()
+   print "\n\nLIST OF REGISTERED DEVICES DEVICES:"
+   mgtObjects.ListDevices()
 
 
 

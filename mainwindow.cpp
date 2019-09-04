@@ -9,19 +9,38 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    bool usePython = true;
+
+    m_pythonConnection = new PythonConnection(this);
+    if (m_pythonConnection->connectInterface() != 0)
+    {
+        qDebug() << "Error connecting to python bus";
+        usePython = false;
+    }
+
     m_bt.setMainWindow(this);
 
     ui->foundDevicesListWidget->setEnabled(false);
     ui->discoveredDevicesListWidget->setEnabled(false);
     ui->pairButton->setEnabled(false);
     ui->unPairButton->setEnabled(false);
-    ui->pairedDeviceAddress->setText("UNKOWN");
+    if (usePython)
+       ui->pairedDeviceAddress->setText(m_pythonConnection->getPairedDevices());
+    else
+       ui->pairedDeviceAddress->setText("UNKNOWN");
 
     /* List local devices: */
-    if ( m_bt.list() != 0)
+    int numberOfLocalDevices = m_bt.list();
+    if (numberOfLocalDevices == 0)
     {
         ui->localDeviceAddress->setText("NONE FOUND");
         ui->scanButton->setEnabled(false);
+    }
+    else if (numberOfLocalDevices > 1)
+    {
+        ui->localDeviceAddress->setText("MULTIPLE DEVICES FOUND");
+        ui->scanButton->setEnabled(false);
+
     }
     else
     {
@@ -31,8 +50,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->scanButton, SIGNAL(clicked()), this, SLOT(scanButtonPressed()));
     connect(ui->pairButton, SIGNAL(clicked()), this, SLOT(pairButtonPressed()));
-
     connect(ui->discoveredDevicesListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(discoveredDeviceSelected()));
+    connect(ui->quitPythonButton, SIGNAL(clicked()), this, SLOT(quitPython()));
+    connect(ui->testPushButton, SIGNAL(clicked()), this, SLOT(testButtonPressed()));
 }
 
 MainWindow::~MainWindow()
@@ -112,7 +132,6 @@ void MainWindow::scanComplete()
     ui->discoveredDevicesListWidget->setEnabled(true);
     ui->scanButton->setEnabled(true);
     this->setCursor(Qt::ArrowCursor);
-
 }
 void MainWindow::addAScannedDevice(QString address, QString name)
 {
@@ -138,4 +157,14 @@ void MainWindow::discoveredDeviceSelected()
         ui->pairButton->setEnabled(false);
     }
 }
+void MainWindow::quitPython()
+{
+   qDebug() << "QUIT PYTHON BUTTON PRESSED";
+   m_pythonConnection->quitPython();
+}
+void MainWindow::testButtonPressed()
+{
+   qDebug() << "TEST BUTTON PRESSED";
+   qDebug() << "Python get paired devices returns:  " << m_pythonConnection->getPairedDevices();
 
+}

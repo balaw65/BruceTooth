@@ -1,12 +1,37 @@
 #ifndef PYTHONCONNECTION_H
 #define PYTHONCONNECTION_H
 
-#include <QObject>
+#include <QtCore/QObject>
+#include <QtCore/QFile>
+#include <QtDBus/QDBusVariant>
+#include <QtDBus/QDBusInterface>
 
-class PythonConnection : public QDBusAbstractAdapter
+#define SERVICE_NAME "org.law.pydbus.BruceTooth"
+
+class PythonConnection:public QObject
 {
+    Q_OBJECT
+
 public:
-    PythonConnection();
+    PythonConnection(QObject * obj);
+    ~PythonConnection();
+
+    int connectInterface();
+    QString getPairedDevices();
+    void quitPython();
+
+
+private:
+    QDBusInterface * m_iface;
+
+
+
+#if 0
+signals:
+    void messageFromPython();
+public slots:
+    void sendMessageToPython(const QString &query);
+#endif
 };
 
 #endif // PYTHONCONNECTION_H

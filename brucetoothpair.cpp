@@ -11,35 +11,20 @@ BruceToothPair::BruceToothPair(QObject *parent) : QObject(parent)
    m_this = this;
    m_pairFailCount = 0;
    m_btNumberOfPairedDevices = 0;
-
+   m_localDevice = new QBluetoothLocalDevice;
 }
 int BruceToothPair::list()
 {
-   return 0;
-}
-QString BruceToothPair::getAddressOfLocalDevice()
-{
-    return ""; //m_localDevice->address().toString();
-}
-void BruceToothPair::powerOn()
-{
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-//   m_localDevice->powerOn();
-}
-void BruceToothPair::powerOff()
-{
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-//   m_localDevice->setHostMode(QBluetoothLocalDevice::HostPoweredOff);
-}
-void BruceToothPair::setAgent()
-{
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-//   m_localDevice->setHostMode(QBluetoothLocalDevice::HostDiscoverable);
-}
-void BruceToothPair::setDefaultAgent()
-{
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-    //discoveryAgent->setInquiryType()
+    int i = 1;
+    foreach (QBluetoothHostInfo localHostInfoDevice, m_localDevice->allDevices())
+    {
+       qDebug() << "Local " << i << " Name:    " << localHostInfoDevice.name();
+       qDebug() << "Local " << i << " Address: " << localHostInfoDevice.address();
+       i++;
+    }
+    if ( m_localDevice->allDevices().count() == 1 )
+       qDebug() << m_localDevice->address();
+   return m_localDevice->allDevices().count();
 }
 void BruceToothPair::scanOn()
 {
@@ -55,24 +40,26 @@ void BruceToothPair::scanOn()
    connect(m_discoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));
 
 }
-void BruceToothPair::deviceFound(QBluetoothDeviceInfo info)
+void BruceToothPair::setMainWindow(MainWindow *mw)
 {
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
-   qDebug() << "Device Found:  " << info.address();
-   if (m_mainWindow != nullptr)
-   {
-       m_mainWindow->addAScannedDevice(info.address().toString(), info.name());
-   }
+    m_mainWindow = mw;
 }
 void BruceToothPair::scanFinished()
 {
-    qDebug() << __FILE__ << ":" << __FUNCTION__;
+   qDebug() << __FILE__ << ":" << __FUNCTION__;
    qDebug() << "DONE SCANNING";
-   int Devices = 0;
+
+
    m_mainWindow->scanComplete();
    m_found_devices =  m_discoveryAgent->discoveredDevices();
+
    foreach (QBluetoothDeviceInfo info, m_found_devices)
    {
+       qDebug() << "NAME:            " << info.name();
+       qDebug() << "ADDRESS:         " << info.address().toString();
+       qDebug() << "PAIRING STATUS:  " << m_localDevice->pairingStatus(info.address());
+
+
       m_mainWindow->addADiscoveredDevice(info.address().toString(), info.name(),
                                           m_localDevice->pairingStatus(info.address()));
 
@@ -94,6 +81,44 @@ void BruceToothPair::scanFinished()
    if ( m_btNumberOfPairedDevices == 0)
        m_btPairedDevicesAddress.clear();
    m_mainWindow->numberOfPairedDevices(m_btNumberOfPairedDevices);
+}
+void BruceToothPair::serviceDiscoveryFinished()
+{
+   qDebug() << "Display Confirmation Reject";
+}
+void BruceToothPair::deviceFound(QBluetoothDeviceInfo info)
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__;
+   qDebug() << "Device Found:  " << info.address();
+   if (m_mainWindow != nullptr)
+   {
+       m_mainWindow->addAScannedDevice(info.address().toString(), info.name());
+   }
+}
+void BruceToothPair::powerOn()
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__;
+//   m_localDevice->powerOn();
+}
+void BruceToothPair::powerOff()
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__;
+//   m_localDevice->setHostMode(QBluetoothLocalDevice::HostPoweredOff);
+}
+void BruceToothPair::setAgent()
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__;
+//   m_localDevice->setHostMode(QBluetoothLocalDevice::HostDiscoverable);
+}
+void BruceToothPair::setDefaultAgent()
+{
+    qDebug() << __FILE__ << ":" << __FUNCTION__;
+    //discoveryAgent->setInquiryType()
+}
+
+QString BruceToothPair::getAddressOfLocalDevice()
+{
+    return m_localDevice->address().toString();
 }
 #if 0
 void BruceToothPair::displayPin(const QBluetoothAddress &address, QString pin)
@@ -117,10 +142,7 @@ void BruceToothPair::serviceDiscovered(const QBluetoothServiceInfo &serviceInfo)
     qDebug() << "Service Info: ";
     qDebug() << "   name:  " << serviceInfo.serviceName();
 }
-void BruceToothPair::serviceDiscoveryFinished()
-{
-   qDebug() << "Display Confirmation Reject";
-}
+
 
 void BruceToothPair::dbusError()
 {
@@ -196,7 +218,3 @@ bool BruceToothPair::waitForService(const QString &serviceName, const QDBusConne
     return false;
 }
 #endif
-void BruceToothPair::setMainWindow(MainWindow *mw)
-{
-    m_mainWindow = mw;
-}

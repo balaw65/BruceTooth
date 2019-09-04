@@ -14,33 +14,30 @@ class BruceToothPair : public QObject
 public:
     explicit BruceToothPair(QObject *parent = nullptr);
 
-    int  list();
-
-    void scanOn();
-    void pairDevice(QString atAddress);
-
-    QString getAddressOfLocalDevice();
-
-    void setMainWindow(MainWindow * mw);
+    QString getAddressOfLocalDevice(); //Ok
+    int  list(); // Ok
+    //void pairDevice(QString atAddress);
+    void scanOn(); // Ok
+    void setMainWindow(MainWindow * mw); // Ok
 
 
 public slots:
-    void scanFinished();
+    void scanFinished(); // Ok
+
+
 private slots:
 
-    void displayConfAccepted();
-    void displayConfReject();
 
-    void serviceDiscoveryFinished();
-    void deviceFound(QBluetoothDeviceInfo info);
+    void serviceDiscoveryFinished(); // Ok
+    void deviceFound(QBluetoothDeviceInfo info); //OK
 
 
 private:
 
-    void powerOn();
-    void powerOff();
-    void setAgent();
-    void setDefaultAgent();
+    void powerOn(); // Ok
+    void powerOff(); // Ok
+    void setAgent(); // Ok
+    void setDefaultAgent(); // Ok
 
 
 
