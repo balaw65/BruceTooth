@@ -21,12 +21,20 @@ class Devices:
       objMgr = ObjectManager()
       devices = objMgr.GetAddresses()
 
-      print "Attempting to find %s" % addressString
-      print devices[addressString]
-      # Form new string:
-      newPath = "/org/bluez/hci0/dev_%s" % (devices[addressString].replace(':','_'))
-      print "New Path: |%s|" % newPath
+#     print "Attempting to find %s" % addressString
+#     print devices[addressString]['Address']
+#     # Form new string:
+#     newPath = "/org/bluez/hci0/dev_%s" % (devices[addressString]['Address'].replace(':','_'))
+#     print "New Path: |%s|" % newPath
 
+      newPath = objMgr.DoesDeviceExist(0, addressString)
+
+      if newPath != None:
+        print "Attempting to pair device at path: %s" % newPath
+        device = self.bus.get(self.busName, newPath)
+        device.Pair()
+      else:
+        print "Unable to find device at: %s" % addressString
  
    def returnPairedDevices(self):
 
