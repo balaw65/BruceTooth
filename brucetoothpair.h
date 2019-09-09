@@ -16,6 +16,7 @@ public:
 
     QString getAddressOfLocalDevice(); //Ok
     int  list(); // Ok
+    void pairDevice(QString atAddress);
     void unPairDevice(QString atAddress);
 
     void scanOn(); // Ok

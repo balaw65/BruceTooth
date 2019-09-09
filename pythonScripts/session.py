@@ -4,8 +4,12 @@ from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
 from devices import Devices
+
+
 loop = GLib.MainLoop()
-bus = SessionBus()
+
+
+sessionBus = SessionBus()
 
 
 class Session(object):
@@ -50,22 +54,23 @@ class Session(object):
       devices = Devices()
       devices.pairDevice(s)
 
-
-
-
-
    def SomeProperty(self):
       return self._someProperty
 
    def Quit(self):
       """removes this object from the DBUS connection and exits"""
+      print("Session quit called")
       loop.quit()
 
+   def RunLoop(self):
+      loop.run()
 
-
-bus = SessionBus()
-bus.publish("org.law.pydbus.BruceTooth", Session())
-loop.run()
+'''
+if __name__ == '__main__':
+   sessionBus = SessionBus()
+   sessionBus.publish("org.law.pydbus.BruceTooth", Session())
+   loop.run()
+'''
 
 
 

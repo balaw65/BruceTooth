@@ -157,6 +157,13 @@ void BruceToothPair::unPairDevice(QString atAddress)
 
 
 }
+void BruceToothPair::pairDevice(QString atAddress)
+{
+   /* First, find paired devices: */
+   m_btPairedDevicesAddress = QBluetoothAddress(atAddress);
+
+   m_localDevice->requestPairing(m_btPairedDevicesAddress, QBluetoothLocalDevice::Paired);
+}
 
 #if 0
 void BruceToothPair::displayPin(const QBluetoothAddress &address, QString pin)

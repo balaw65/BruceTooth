@@ -89,7 +89,6 @@ void MainWindow::pairButtonPressed()
     ui->foundDevicesListWidget->setEnabled(false);
     m_pythonConnection->pairDevice(m_selectedDevicesAddress);
     //this->setCursor(Qt::WaitCursor);
-    //m_bt.pairDevice(m_selectedDevicesAddress);
 }
 void MainWindow::unpairButtonPressed()
 {
