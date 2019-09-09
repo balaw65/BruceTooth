@@ -11,13 +11,34 @@ import dbus.mainloop.glib
 from optparse import OptionParser
 # import bluez
 
+from gi.repository import GLib
+
+
 
 
 BUS_NAME = 'org.bluez'
 AGENT_INTERFACE = 'org.bluez.Agent1'
 AGENT_PATH = "/test/agent"
 
+loop = GLib.MainLoop()
 
+
+def ask(prompt):
+   try:
+      return raw_input(prompt)
+   except:
+      return input(prompt)
+
+def set_trusted(path): 
+   props = dbus.Interface(bus.get_object("org.bluez", path),"org.freedesktop.DBus.Properties")
+   props.Set("org.bluez.Device1", "Trusted", True)
+
+def dev_connect(path):
+   dev = dbus.Interface(bus.get_object("org.bluez", path),"org.bluez.Device1")
+   dev.Connect()
+
+class Rejected(dbus.DBusException):
+   _dbus_error_name = "org.bluez.Error.Rejected"
 
 
 class Agent(dbus.service.Object):
@@ -31,7 +52,7 @@ class Agent(dbus.service.Object):
    def Release(self):
       print("Release")
       if self.exit_on_release:
-         mainloop.quit()
+         loop.quit()
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
    def AuthorizeService(self, device, uuid):
@@ -84,22 +105,6 @@ class Agent(dbus.service.Object):
       print("Cancel")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Agent2:
 
    def __init__(self):
@@ -129,5 +134,8 @@ class Agent2:
       manager.RegisterAgent(path, capability)
 
       print("Agent is registered")
+
+   def RunLoop(self):
+      loop.run()
 
 

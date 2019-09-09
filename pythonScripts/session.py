@@ -4,17 +4,22 @@ from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
 from devices import Devices
+from agent3 import Agent3
 
 
 loop = GLib.MainLoop()
-
+# agent3 = None
 
 sessionBus = SessionBus()
 
 
 class Session(object):
-
    """
+   Session definition.
+   Emit / Publish a signal that is emitted when a request is made to quit python
+   type='i' for integer.
+   """
+   dbus = """
       <node>
          <interface name='org.law.pydbus.BruceTooth'>
             <method name='EchoString'>
@@ -28,12 +33,13 @@ class Session(object):
                <arg type='s' name='s' direction='in'/>
             </method>
             <method name='Quit'/>
-            <property name="SomeProperty" type="s" access="readwrite">
-               <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
-            </property>
-         </interface>
+            <signal name="send_quit">
+               <arg type='i'/>
+            </signal>
+        </interface>
       </node>
    """
+   send_quit = signal()
 
    def EchoString(self, s):
       """returns whatever is passed to it"""
@@ -54,23 +60,22 @@ class Session(object):
       devices = Devices()
       devices.pairDevice(s)
 
-   def SomeProperty(self):
-      return self._someProperty
-
    def Quit(self):
       """removes this object from the DBUS connection and exits"""
       print("Session quit called")
+      session.send_quit(1)
       loop.quit()
 
    def RunLoop(self):
       loop.run()
 
-'''
+   def SetAgent3(self, a3):
+      agent3 = a3
+
 if __name__ == '__main__':
    sessionBus = SessionBus()
-   sessionBus.publish("org.law.pydbus.BruceTooth", Session())
+   session    = Session()
+   sessionBus.publish("org.law.pydbus.BruceTooth", session)
    loop.run()
-'''
-
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from session import Session
-from agent2 import Agent2
+from agent3 import Agent3
 from pydbus import SessionBus
 
 
@@ -10,14 +10,11 @@ import os
 
 from gi.repository import GLib
 
-loop1 = GLib.MainLoop()
-loop2 = GLib.MainLoop()
- 
+
 
 def agent():
    print("Agent process")
-   agent = Agent2()
-   # loop1.run()
+   print("DONE")
    
 def session():
    print("Session process") 
@@ -25,8 +22,9 @@ def session():
    sessionBus = SessionBus()
    sessionBus.publish("org.law.pydbus.BruceTooth", sess)
 
+
    sess.RunLoop()
- 
+   print("DONE")
 
 def forkHere():
 
@@ -36,6 +34,7 @@ def forkHere():
       pid = os.fork()
       if pid == 0:
          agent()
+         print("PID IS ZERO")
       else:
          session()
    except OSError:
