@@ -201,5 +201,6 @@ void MainWindow::quitPython()
 void MainWindow::testButtonPressed()
 {
    qDebug() << "TEST BUTTON PRESSED";
-   m_pythonConnection->pairDevice("CC:44:63:20:D0:5F");
+   //m_pythonConnection->pairDevice("CC:44:63:20:D0:5F");
+   m_pythonConnection->test();
 }

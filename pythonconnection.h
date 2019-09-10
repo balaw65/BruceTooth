@@ -20,6 +20,7 @@ public:
     QString getPairedDevices();
     void pairDevice(QString addressString);
     void quitPython();
+    void test();
 
 
 

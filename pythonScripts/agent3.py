@@ -21,6 +21,9 @@ bus = SessionBus()
 
 class Agent3:
 
+   def __init__(self):
+      bus.subscribe(object = dbus_filter, signal_fired=SignalReceived);
+
    def RunLoop(self):
       print("starting loop (agent3)")
       loop.run()
@@ -38,7 +41,10 @@ def SignalReceived(a,b,c,d,e):
    print("c:", c)
    print("d:", d)
    print("e:", e)
-   if d == 'send_quit':
+   print("Type of e is:  "),
+   print(type(e))
+   if e[0] == 5:
+      print("Quitting Agent")
       loop.quit()
 
 

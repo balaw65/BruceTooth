@@ -10,8 +10,6 @@ import os
 
 from gi.repository import GLib
 
-
-
 def agent():
    print("Agent process")
    print("DONE")
@@ -22,12 +20,10 @@ def session():
    sessionBus = SessionBus()
    sessionBus.publish("org.law.pydbus.BruceTooth", sess)
 
-
    sess.RunLoop()
    print("DONE")
 
 def forkHere():
-
 #   session()
 
    try:

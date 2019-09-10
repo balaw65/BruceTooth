@@ -61,6 +61,11 @@ void PythonConnection::quitPython()
 {
     m_iface->call("Quit");
 }
+void PythonConnection::test()
+{
+    m_iface->call("Test");
+}
+
 #if 0
 void PythonConnection::messageFromPython()
 {

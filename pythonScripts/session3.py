@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+import sys
+import time
+
 from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
@@ -12,6 +16,10 @@ loop = GLib.MainLoop()
 
 sessionBus = SessionBus()
 
+def SpawnAgent():
+   print("SPWWAAAANWNING AGENT!")
+   agent3 = Agent3()
+   agent3.RunLoop()
 
 class Session(object):
    """
@@ -32,6 +40,7 @@ class Session(object):
             <method name='PairDevice'>
                <arg type='s' name='s' direction='in'/>
             </method>
+            <method name='Test'/>
             <method name='Quit'/>
             <signal name="send_to_agent">
                <arg type='i'/>
@@ -65,6 +74,15 @@ class Session(object):
       print("Session quit called")
       session.send_to_agent(5)
       loop.quit()
+
+   def Test(self):
+      print("Test Called")
+      try:
+         pid = os.fork()
+         if pid != 0:
+            SpawnAgent()
+      except OSError:
+         sys.stderr.write("Could not create child process\n")
 
    def RunLoop(self):
       loop.run()
