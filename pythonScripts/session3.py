@@ -3,31 +3,19 @@
 import os
 import sys
 import time
+import testclass
 
+from testclass import TestClass
 from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
 from devices import Devices
-from agent3 import Agent3
-
 
 loop = GLib.MainLoop()
-# agent3 = None
-
-sessionBus = SessionBus()
-
-def SpawnAgent():
-   print("SPWWAAAANWNING AGENT!")
-   agent3 = Agent3()
-   agent3.RunLoop()
+# sessionBus = SessionBus()
 
 class Session(object):
    """
-   Session definition.
-   Emit / Publish a signal that is emitted when a request is made to quit python
-   type='i' for integer.
-   """
-   dbus = """
       <node>
          <interface name='org.law.pydbus.BruceTooth'>
             <method name='EchoString'>
@@ -42,13 +30,14 @@ class Session(object):
             </method>
             <method name='Test'/>
             <method name='Quit'/>
-            <signal name="send_to_agent">
+            <signal name='NotifyAgent'>
+               <arg type='i'/>
                <arg type='i'/>
             </signal>
         </interface>
       </node>
    """
-   send_to_agent = signal()
+   NotifyAgent = signal()
 
    def EchoString(self, s):
       """returns whatever is passed to it"""
@@ -56,6 +45,7 @@ class Session(object):
 
    def GetPairedDevices(a):
       """returns all devices paired to the local interface"""
+      print("Call to Get Paired Devices was made")
       devices = Devices()
       a = devices.returnPairedDevices()
 
@@ -72,26 +62,43 @@ class Session(object):
    def Quit(self):
       """removes this object from the DBUS connection and exits"""
       print("Session quit called")
-      session.send_to_agent(5)
+      session.NotifyAgent(5, os.getpid())
       loop.quit()
 
    def Test(self):
       print("Test Called")
-      try:
-         pid = os.fork()
-         if pid != 0:
-            SpawnAgent()
-      except OSError:
-         sys.stderr.write("Could not create child process\n")
+      session.NotifyAgent(2, 0)
+ 
 
-   def RunLoop(self):
-      loop.run()
-
+#  def RunLoop(self):
+#     loop.run()
 
 if __name__ == '__main__':
-   sessionBus = SessionBus()
-   session    = Session()
-   sessionBus.publish("org.law.pydbus.BruceTooth", session)
-   loop.run()
+#  sessionBus = SessionBus()
+#  session    = Session()
+#  sessionBus.publish("org.law.pydbus.BruceTooth", session)
+#  loop.run()
+
+
+
+   for i in range(1,2):
+      try:
+         pid = os.fork()
+         print("pid: %i" % pid)
+         if pid != 0:
+            sessionBus = SessionBus()
+            session    = Session()
+            sessionBus.publish("org.law.pydbus.BruceTooth", session)
+            loop.run()
+            print("DDDDDOOOOOONNNNNNNEEEEE WITH SESSION!!!!")
+         else:
+            time.sleep(1)
+            test = TestClass()
+            print("DDDDDOOOOOONNNNNNNEEEEE WITH AGENT!!!!!!")
+
+      except OSError:
+         sys.stderr.write("Could not create a child process\n")
+
+
 
 

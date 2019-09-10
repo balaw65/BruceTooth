@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->unPairButton->setEnabled(false);
     if (usePython)
     {
+        qDebug() << "USING PYTHON TO GET PAIRED DEVICES: ";
+        // THIS CALL ISN't ALWAYS WORKING, WHY?????
        m_pairedDeviceAddress = m_pythonConnection->getPairedDevices();
        ui->pairedDeviceAddress->setText(m_pairedDeviceAddress);
        if (m_pairedDeviceAddress.split(":").count() == 6)
