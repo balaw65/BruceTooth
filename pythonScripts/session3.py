@@ -4,12 +4,15 @@ import os
 import sys
 import time
 import testclass
+import dbus
+import xml.dom.minidom
 
 from testclass import TestClass
 from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
 from devices import Devices
+from xml.etree import ElementTree
 
 loop = GLib.MainLoop()
 # sessionBus = SessionBus()
@@ -43,16 +46,21 @@ class Session(object):
       """returns whatever is passed to it"""
       return s
 
+   # This is not always being called, why not??? 
    def GetPairedDevices(a):
       """returns all devices paired to the local interface"""
       print("Call to Get Paired Devices was made")
-      devices = Devices()
-      a = devices.returnPairedDevices()
 
-      for pDevice in a:
-         print pDevice
 
-      return a
+      devices = []
+      devices.append("00:00:00:00:00:00")
+      # devices = Devices()
+      # a = devices.returnPairedDevices()
+
+      # for pDevice in a:
+      #   print pDevice
+
+      return devices
 
    def PairDevice(self, s):
       print ("Attempting to pair device at address: %s" % s)
@@ -89,10 +97,22 @@ if __name__ == '__main__':
             sessionBus = SessionBus()
             session    = Session()
             sessionBus.publish("org.law.pydbus.BruceTooth", session)
+
+            # Verifiy session? 
+            obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
+            iface = dbus.Interface(obj,"org.freedesktop.DBus.Introspectable")
+          
+            print('Methods:')
+
+            doc = xml.dom.minidom.parseString(iface.Introspect())
+            methods = doc.getElementsByTagName("method")
+            for method in methods:
+               print method.getAttribute("name")
+
+            time.sleep(1)
             loop.run()
             print("DDDDDOOOOOONNNNNNNEEEEE WITH SESSION!!!!")
          else:
-            time.sleep(1)
             test = TestClass()
             print("DDDDDOOOOOONNNNNNNEEEEE WITH AGENT!!!!!!")
 
