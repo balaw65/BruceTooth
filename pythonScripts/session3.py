@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-import os
+import os, subprocess
 import sys
 import time
-import testclass
+import agent
 import dbus
 import xml.dom.minidom
 
-from testclass import TestClass
 from pydbus.generic import signal
 from pydbus import SessionBus
 from gi.repository import GLib
@@ -31,6 +30,8 @@ class Session(object):
             <method name='PairDevice'>
                <arg type='s' name='s' direction='in'/>
             </method>
+            <method name='RunAgent'/>
+            <method name='KillAgent'/>
             <method name='Test'/>
             <method name='Quit'/>
             <signal name='NotifyAgent'>
@@ -52,73 +53,72 @@ class Session(object):
       print("Call to Get Paired Devices was made")
 
 
-      devices = []
-      devices.append("00:00:00:00:00:00")
-      # devices = Devices()
-      # a = devices.returnPairedDevices()
+      devices = Devices()
+      a = devices.returnPairedDevices()
 
-      # for pDevice in a:
-      #   print pDevice
+      for pDevice in a:
+         print pDevice
 
-      return devices
+      return a
 
    def PairDevice(self, s):
       print ("Attempting to pair device at address: %s" % s)
       devices = Devices()
       devices.pairDevice(s)
 
+   def RunAgent(self):
+      print("Run Agent Called")
+      # spawn agent (shell=True makes it non-blocking, i think):
+      subprocess.Popen('python agent.py', shell=True)
+      print("FROM SESSION RUNAGENT, AGENT CALLED!!!")
+
+   def KillAgent(self):
+      print("Kill Agent Called")
+      # spawn agent:
+      session.NotifyAgent(5, 0)
+ 
+   def Test(self):
+      print("Test Called")
+      # spawn agent:
+      session.NotifyAgent(2, 0)
+ 
    def Quit(self):
       """removes this object from the DBUS connection and exits"""
       print("Session quit called")
       session.NotifyAgent(5, os.getpid())
       loop.quit()
 
-   def Test(self):
-      print("Test Called")
-      session.NotifyAgent(2, 0)
- 
+
 
 #  def RunLoop(self):
 #     loop.run()
 
 if __name__ == '__main__':
-#  sessionBus = SessionBus()
-#  session    = Session()
-#  sessionBus.publish("org.law.pydbus.BruceTooth", session)
-#  loop.run()
 
+   try:
+      sessionBus = SessionBus()
+      session    = Session()
+      sessionBus.publish("org.law.pydbus.BruceTooth", session)
 
+      # Verify session? 
+      obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
+      iface = dbus.Interface(obj,"org.freedesktop.DBus.Introspectable")
+      
+      doc = xml.dom.minidom.parseString(iface.Introspect())
+      methods = doc.getElementsByTagName("method")
+      sessionMethods = []
+      for method in methods:
+         if ((method.getAttribute("name") == 'GetPairedDevices') or
+                  (method.getAttribute("name") == 'PairDevice') or
+                        (method.getAttribute("name") == 'Test') or
+                        (method.getAttribute("name") == 'Quit')):
+            sessionMethods.append(method.getAttribute("name"))
+      if len(sessionMethods) != 4:
+         sys.stderr.write("Not all of the session methods were found\n")
+         sys.stderr.write("Quiting session handler\n")
+         os.exit(-1)
 
-   for i in range(1,2):
-      try:
-         pid = os.fork()
-         print("pid: %i" % pid)
-         if pid != 0:
-            sessionBus = SessionBus()
-            session    = Session()
-            sessionBus.publish("org.law.pydbus.BruceTooth", session)
-
-            # Verifiy session? 
-            obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
-            iface = dbus.Interface(obj,"org.freedesktop.DBus.Introspectable")
-          
-            print('Methods:')
-
-            doc = xml.dom.minidom.parseString(iface.Introspect())
-            methods = doc.getElementsByTagName("method")
-            for method in methods:
-               print method.getAttribute("name")
-
-            time.sleep(1)
-            loop.run()
-            print("DDDDDOOOOOONNNNNNNEEEEE WITH SESSION!!!!")
-         else:
-            test = TestClass()
-            print("DDDDDOOOOOONNNNNNNEEEEE WITH AGENT!!!!!!")
-
-      except OSError:
-         sys.stderr.write("Could not create a child process\n")
-
-
-
+      loop.run()
+   except OSError:
+      sys.stderr.write("Could not create a child process\n")
 

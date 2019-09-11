@@ -36,6 +36,8 @@ private slots:
     void discoveredDeviceSelected();
     void quitPython();
     void testButtonPressed();
+    void startAgentButtonPressed();
+    void killAgentButtonPressed();
 
 private:
     Ui::MainWindow *ui;

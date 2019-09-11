@@ -56,6 +56,14 @@ void PythonConnection::pairDevice(QString addressString)
     qDebug() << __FILE__ << ":" << __FUNCTION__ << ":" << addressString;
     m_iface->call("PairDevice", addressString);
 }
+void PythonConnection::startAgent()
+{
+    m_iface->call("RunAgent");
+}
+void PythonConnection::killAgent()
+{
+    m_iface->call("KillAgent");
+}
 
 void PythonConnection::quitPython()
 {

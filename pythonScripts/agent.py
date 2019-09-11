@@ -99,6 +99,20 @@ class Agent(dbus.service.Object):
    def Cancel(self):
       print("Cancel")
 
+   def SignalReceived(a,b,c):
+
+      print("a:", a)
+      print("b:", b)
+      print("c:", c)
+
+      if   b == 2:
+         print("Test Button Pressed")
+      elif b == 5:
+         print("Quitting Agent")
+         mainloop.quit()
+
+
+
 def pair_reply():
    print("Device paired")
    set_trusted(dev_path)
@@ -134,7 +148,8 @@ if __name__ == '__main__':
    path = "/test/agent"
    # path = "/org/bluez/agent"
    agent = Agent(bus, path)
-
+   dbus.SessionBus().add_signal_receiver(agent.SignalReceived, dbus_interface='org.law.pydbus.BruceTooth', signal_name='NotifyAgent')
+ 
    mainloop = GObject.MainLoop()
 
    obj = bus.get_object(BUS_NAME, "/org/bluez");

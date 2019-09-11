@@ -65,8 +65,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->discoveredDevicesListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(discoveredDeviceSelected()));
 
-    connect(ui->quitPythonButton, SIGNAL(clicked()), this, SLOT(quitPython()));
-    connect(ui->testPushButton,   SIGNAL(clicked()), this, SLOT(testButtonPressed()));
+    connect(ui->agentStartPushButton, SIGNAL(clicked()), this, SLOT(startAgentButtonPressed()));
+    connect(ui->killAgentPushButton,  SIGNAL(clicked()), this, SLOT(killAgentButtonPressed()));
+    connect(ui->quitPythonButton,     SIGNAL(clicked()), this, SLOT(quitPython()));
+    connect(ui->testPushButton,       SIGNAL(clicked()), this, SLOT(testButtonPressed()));
 }
 
 MainWindow::~MainWindow()
@@ -194,6 +196,16 @@ void MainWindow::discoveredDeviceSelected()
     else {
         ui->pairButton->setEnabled(false);
     }
+}
+void MainWindow::startAgentButtonPressed()
+{
+   qDebug() << "START AGENT BUTTON PRESSED";
+   m_pythonConnection->startAgent();
+}
+void MainWindow::killAgentButtonPressed()
+{
+   qDebug() << "KILL AGENT BUTTON PRESSED";
+   m_pythonConnection->killAgent();
 }
 void MainWindow::quitPython()
 {

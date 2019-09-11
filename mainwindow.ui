@@ -203,6 +203,32 @@
      <string>Test Button</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="agentStartPushButton">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>60</y>
+      <width>141</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Agent</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="killAgentPushButton">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>90</y>
+      <width>141</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Kill Agent</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
