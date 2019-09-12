@@ -3,7 +3,8 @@
 import os, subprocess
 import sys
 import time
-import agent
+import threading
+
 import dbus
 import xml.dom.minidom
 
@@ -15,6 +16,8 @@ from xml.etree import ElementTree
 
 loop = GLib.MainLoop()
 # sessionBus = SessionBus()
+
+
 
 class Session(object):
    """
@@ -63,17 +66,31 @@ class Session(object):
 
    def PairDevice(self, s):
       print ("Attempting to pair device at address: %s" % s)
-      # start agent:
-      # spawn agent (shell=True makes it non-blocking, i think):
-      subprocess.Popen('python agent.py', shell=True)
- 
+      # x = threading.Thread(target=self.AgentThread)
+      # x.start()
+
       devices = Devices()
       devices.pairDevice(s)
 
    def RunAgent(self):
       print("Run Agent Called")
+      x = threading.Thread(target=AgentThread)
+      x.start()
+ 
       # spawn agent (shell=True makes it non-blocking, i think):
-      subprocess.Popen('python agent.py', shell=True)
+      try:
+         # Test verions: results = subprocess.call(['python', 'agent3.py'], shell=False)
+         results = subprocess.call(['python', 'agent.py'], shell=False)
+ 
+         print("Results of agent: "),
+         print(results)
+      except OSError:
+         sys.stderr.write("OSError spawning agent\n");
+      except:
+         sys.stderr.write("Error spawning agent\n");
+
+
+
       print("FROM SESSION RUNAGENT, AGENT CALLED!!!")
 
    def KillAgent(self):
@@ -92,10 +109,19 @@ class Session(object):
       session.NotifyAgent(5, os.getpid())
       loop.quit()
 
+   def AgentThread(self):
+      print("Spawning agent in session thread:")
+      try:
+         # Test verions: results = subprocess.call(['python', 'agent3.py'], shell=False)
+         results = subprocess.call(['python', 'agent.py'], shell=False)
+      except OSError:
+         sys.stderr.write("OSError spawning agent\n");
+      except:
+         sys.stderr.write("Error spawning agent\n");
 
 
-#  def RunLoop(self):
-#     loop.run()
+
+
 
 if __name__ == '__main__':
 

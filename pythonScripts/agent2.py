@@ -52,7 +52,7 @@ class Agent(dbus.service.Object):
    def Release(self):
       print("Release")
       if self.exit_on_release:
-         loop.quit()
+         mainloop.quit()
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
    def AuthorizeService(self, device, uuid):
@@ -105,37 +105,52 @@ class Agent(dbus.service.Object):
       print("Cancel")
 
 
-class Agent2:
 
-   def __init__(self):
+def pair_reply():
+   print("FROM AGENT:  Device paired")
+   set_trusted(dev_path)
+   dev_connect(dev_path)
+   mainloop.quit()
 
-      dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+def pair_error(error):
+   err_name = error.get_dbus_name()
+   if err_name == "org.freedesktop.DBus.Error.NoReply" and device_obj:
+      print("FROM AGENT:  Timed out. Cancelling pairing")
+      device_obj.CancelPairing()
+   else:
+      print("FROM AGENT:  Creating device failed: %s" % (error))
+   mainloop.quit()
 
-      bus = dbus.SystemBus()
 
-      capability = "KeyboardDisplay"
+if __name__ == '__main__':
 
-      parser = OptionParser()
-      parser.add_option("-i", "--adapter",action="store",type="string",dest="adapter_pattern",default=None)
-      parser.add_option("-c", "--capability", action="store",type="string", dest="capability")
-      parser.add_option("-t", "--timeout", action="store",type="int", dest="timeout",default=60000)
-      (options, args) = parser.parse_args()
-      if options.capability:
-         capability  = options.capability
 
-      path = "/test/agent"
-      # path = "/org/bluez/agent"
-      agent = Agent(bus, path)
+   dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-      # mainloop = GObject.MainLoop()
+   bus = dbus.SystemBus()
 
-      obj = bus.get_object(BUS_NAME, "/org/bluez");
-      manager = dbus.Interface(obj, "org.bluez.AgentManager1")
-      manager.RegisterAgent(path, capability)
+   capability = "KeyboardDisplay"
 
-      print("Agent is registered")
+   parser = OptionParser()
+   parser.add_option("-i", "--adapter",action="store",type="string",dest="adapter_pattern",default=None)
+   parser.add_option("-c", "--capability", action="store",type="string", dest="capability")
+   parser.add_option("-t", "--timeout", action="store",type="int", dest="timeout",default=60000)
+   (options, args) = parser.parse_args()
+   if options.capability:
+      capability  = options.capability
 
-   def RunLoop(self):
-      loop.run()
+   path = "/test/agent"
+   # path = "/org/bluez/agent"
+   agent = Agent(bus, path)
+
+   mainloop = GObject.MainLoop()
+
+   obj = bus.get_object(BUS_NAME, "/org/bluez");
+   manager = dbus.Interface(obj, "org.bluez.AgentManager1")
+   manager.RegisterAgent(path, capability)
+
+   print("Agent is registered")
+
+   mainloop.run()
 
 

@@ -8,6 +8,12 @@ import sys
 import dbus
 import dbus.service
 import dbus.mainloop.glib
+import logging
+import threading
+import time
+
+from devices import Devices
+
 from optparse import OptionParser
 # import bluez
 
@@ -19,7 +25,18 @@ bus = None
 device_obj = None
 dev_path = None
 
+def CountDownThread():
+   '''
+   print("\033[2J\0331;1HKilling agent in:")
+   for i in range(1,10):
+      print("\0332;1H%i seconds" % (10 - i))
+      time.sleep(1)
+   '''
+   mainloop.quit()
+ 
 def ask(prompt):
+   x = threading.Thread(target=CountDownThread)
+   x.start()
    try:
       return raw_input(prompt)
    except:
@@ -66,6 +83,8 @@ class Agent(dbus.service.Object):
    def RequestPinCode(self, device):
       print("FROM AGENT:  RequestPinCode (%s)" % (device))
       set_trusted(device)
+
+
       return ask("FROM AGENT:  Enter PIN Code: ")
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="u")
@@ -114,7 +133,21 @@ class Agent(dbus.service.Object):
          print("FROM AGENT:  Test Button Pressed")
       elif b == 5:
          print("FROM AGENT:  Quitting Agent")
+         obj = bus.get_object(BUS_NAME, "/org/bluez");
+         manager = dbus.Interface(obj, "org.bluez.AgentManager1")
+         manager.UnregisterAgent(path)
+
+
          mainloop.quit()
+
+   '''
+   def CountDownThread(self):
+      print("Killing agent in:")
+      for i in range(1,10):
+         print("%i seconds" % (10 - i))
+         time.sleep(1)
+      mainloop.quit()
+   '''         
 
 
 
@@ -131,15 +164,22 @@ def pair_error(error):
       device_obj.CancelPairing()
    else:
       print("FROM AGENT:  Creating device failed: %s" % (error))
-
-
    mainloop.quit()
 
 if __name__ == '__main__':
    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
+   '''
+   print("Agent spawned, creating logger...")
+   format = "%(asctime)s: %(message)s"
+   logging.basicConfig(format=format, level=logging.DEBUG, datefmt="%H:%M:%S")
+   '''
+
    bus = dbus.SystemBus()
 
+
+   '''
+   # What the fuck does this do????
    capability = "KeyboardDisplay"
 
    parser = OptionParser()
@@ -149,32 +189,37 @@ if __name__ == '__main__':
    (options, args) = parser.parse_args()
    if options.capability:
       capability  = options.capability
+   '''
+
 
    path = "/test/agent"
-   # path = "/org/bluez/agent"
+   pathOfBlueToothControl = "/org/bluez/agent"
    agent = Agent(bus, path)
+
    dbus.SessionBus().add_signal_receiver(agent.SignalReceived, dbus_interface='org.law.pydbus.BruceTooth', signal_name='NotifyAgent')
- 
+
    mainloop = GObject.MainLoop()
 
    obj = bus.get_object(BUS_NAME, "/org/bluez");
    manager = dbus.Interface(obj, "org.bluez.AgentManager1")
-   manager.RegisterAgent(path, capability)
+
+
+   # TODO: Find any registered agents and remove them:
+
+   '''
+   try:
+      manager.UnregisterAgent(pathOfBlueToothControl)
+   except:
+      print("/org/agent1 not registered") 
+
+   try:
+      manager.UnregisterAgent(path)
+   except:
+      print("/org/test not registered") 
+   '''
+
+   manager.RegisterAgent(path, "") #capability)
+   manager.RequestDefaultAgent(path)
 
    print("Agent is registered")
-
-   # Fix-up old style invocation (BlueZ 4)
-   if len(args) > 0 and args[0].startswith("hci"):
-      options.adapter_pattern = args[0]
-   del args[:1]
-
-   if len(args) > 0:
-      device = bluezutils.find_device(args[0],options.adapter_pattern)
-      dev_path = device.object_path
-      agent.set_exit_on_release(False)
-      device.Pair(reply_handler=pair_reply, error_handler=pair_error, timeout=60000)
-      device_obj = device
-   else:
-      manager.RequestDefaultAgent(path)
-
    mainloop.run()

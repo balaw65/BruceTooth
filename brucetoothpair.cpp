@@ -75,6 +75,9 @@ void BruceToothPair::scanFinished()
    qDebug() << __FILE__ << ":" << __FUNCTION__;
    qDebug() << "DONE SCANNING";
 
+   m_discoveryAgent->stop();
+
+
 
    m_mainWindow->scanComplete();
    m_found_devices =  m_discoveryAgent->discoveredDevices();
