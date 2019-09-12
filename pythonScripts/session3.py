@@ -63,6 +63,10 @@ class Session(object):
 
    def PairDevice(self, s):
       print ("Attempting to pair device at address: %s" % s)
+      # start agent:
+      # spawn agent (shell=True makes it non-blocking, i think):
+      subprocess.Popen('python agent.py', shell=True)
+ 
       devices = Devices()
       devices.pairDevice(s)
 

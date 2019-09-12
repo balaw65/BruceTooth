@@ -28,13 +28,18 @@ def ask(prompt):
 def set_trusted(path): 
    props = dbus.Interface(bus.get_object("org.bluez", path),"org.freedesktop.DBus.Properties")
    props.Set("org.bluez.Device1", "Trusted", True)
+   print("FROM AGENT:  Device at %s has been set to trusted" % path)
 
 def dev_connect(path):
    dev = dbus.Interface(bus.get_object("org.bluez", path),"org.bluez.Device1")
    dev.Connect()
+   print("FROM AGENT:  Device at %s has been set connected" % path)
+
+
 
 class Rejected(dbus.DBusException):
    _dbus_error_name = "org.bluez.Error.Rejected"
+
 
 class Agent(dbus.service.Object):
    exit_on_release = True
@@ -45,42 +50,42 @@ class Agent(dbus.service.Object):
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
    def Release(self):
-      print("Release")
+      print("FROM AGENT:  Release")
       if self.exit_on_release:
          mainloop.quit()
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
    def AuthorizeService(self, device, uuid):
-      print("AuthorizeService (%s, %s)" % (device, uuid))
-      authorize = ask("Authorize connection (yes/no): ")
+      print("FROM AGENT:  AuthorizeService (%s, %s)" % (device, uuid))
+      authorize = ask("FROM AGENT:  Authorize connection (yes/no): ")
       if (authorize == "yes"):
          return
-      raise Rejected("Connection rejected by user")
+      raise Rejected("FROM AGENT:  Connection rejected by user")
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="s")
    def RequestPinCode(self, device):
-      print("RequestPinCode (%s)" % (device))
+      print("FROM AGENT:  RequestPinCode (%s)" % (device))
       set_trusted(device)
-      return ask("Enter PIN Code: ")
+      return ask("FROM AGENT:  Enter PIN Code: ")
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="u")
    def RequestPasskey(self, device):
-      print("RequestPasskey (%s)" % (device))
+      print("FROM AGENT:  RequestPasskey (%s)" % (device))
       set_trusted(device)
-      passkey = ask("Enter passkey: ")
+      passkey = ask("FROM AGENT:  Enter passkey: ")
       return dbus.UInt32(passkey)
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="ouq", out_signature="")
    def DisplayPasskey(self, device, passkey, entered):
-      print("DisplayPasskey (%s, %06u entered %u)" % (device, passkey, entered))
+      print("FROM AGENT:  DisplayPasskey (%s, %06u entered %u)" % (device, passkey, entered))
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="os", out_signature="")
    def DisplayPinCode(self, device, pincode):
-      print("DisplayPinCode (%s, %s)" % (device, pincode))
+      print("FROM AGENT:  DisplayPinCode (%s, %s)" % (device, pincode))
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="ou", out_signature="")
    def RequestConfirmation(self, device, passkey):
-      print("RequestConfirmation (%s, %06d)" % (device, passkey))
+      print("FROM AGENT:  RequestConfirmation (%s, %06d)" % (device, passkey))
       confirm = ask("Confirm passkey (yes/no): ")
       if (confirm == "yes"):
          set_trusted(device)
@@ -89,15 +94,15 @@ class Agent(dbus.service.Object):
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="")
    def RequestAuthorization(self, device):
-      print("RequestAuthorization (%s)" % (device))
+      print("FROM AGENT:  RequestAuthorization (%s)" % (device))
       auth = ask("Authorize? (yes/no): ")
       if (auth == "yes"):
          return
-      raise Rejected("Pairing rejected")
+      raise Rejected("FROM AGENT:  Pairing rejected")
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="", out_signature="")
    def Cancel(self):
-      print("Cancel")
+      print("FROM AGENT:  Cancel")
 
    def SignalReceived(a,b,c):
 
@@ -106,15 +111,15 @@ class Agent(dbus.service.Object):
       print("c:", c)
 
       if   b == 2:
-         print("Test Button Pressed")
+         print("FROM AGENT:  Test Button Pressed")
       elif b == 5:
-         print("Quitting Agent")
+         print("FROM AGENT:  Quitting Agent")
          mainloop.quit()
 
 
 
 def pair_reply():
-   print("Device paired")
+   print("FROM AGENT:  Device paired")
    set_trusted(dev_path)
    dev_connect(dev_path)
    mainloop.quit()
@@ -122,10 +127,10 @@ def pair_reply():
 def pair_error(error):
    err_name = error.get_dbus_name()
    if err_name == "org.freedesktop.DBus.Error.NoReply" and device_obj:
-      print("Timed out. Cancelling pairing")
+      print("FROM AGENT:  Timed out. Cancelling pairing")
       device_obj.CancelPairing()
    else:
-      print("Creating device failed: %s" % (error))
+      print("FROM AGENT:  Creating device failed: %s" % (error))
 
 
    mainloop.quit()
