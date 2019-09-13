@@ -32,7 +32,8 @@ def ExitLoopThread():
  
 def ask(prompt):
    obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
-   iface = dbus.Interface(obj,"org.freedesktop.DBus.Introspectable")
+   iface = dbus.Interface(obj,"org.law.pydbus.BruceTooth")
+   iface.MessageHost(prompt)
  
    x = threading.Thread(target=ExitLoopThread)
    x.start()
@@ -130,6 +131,10 @@ class Agent(dbus.service.Object):
 
       if   b == 2:
          print("FROM AGENT:  Test Button Pressed")
+         obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
+         iface = dbus.Interface(obj,"org.law.pydbus.BruceTooth")
+         iface.MessageHost("This is a test")
+ 
       elif b == 5:
          print("FROM AGENT:  Quitting Agent")
          obj = bus.get_object(BUS_NAME, "/org/bluez");
