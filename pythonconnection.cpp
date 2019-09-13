@@ -1,6 +1,7 @@
 #include "pythonconnection.h"
 #include <QDebug>
 #include <QDBusReply>
+#include <QtCore/QCoreApplication>
 
 PythonConnection::PythonConnection(QObject * obj):QObject(obj)
 {
@@ -22,6 +23,8 @@ int  PythonConnection::connectInterface()
         qDebug() << "Error connecting to python" << qPrintable(QDBusConnection::sessionBus().lastError().message());
         return -1;
     }
+    qDebug() << "Connecting signal NotifyHost";
+    connect(m_iface,SIGNAL(NotifyHost(int)),this,SLOT(notification(int)));
     return 0;
 }
 QString PythonConnection::getPairedDevices()
@@ -51,10 +54,16 @@ QString PythonConnection::getPairedDevices()
    }
    return QString("");
 }
+void PythonConnection::notification(int v)
+{
+    qDebug() << "NOTIFICATION FROM PYTHON:  " << v;
+}
 void PythonConnection::pairDevice(QString addressString)
 {
-    qDebug() << __FILE__ << ":" << __FUNCTION__ << ":" << addressString;
-    m_iface->call("PairDevice", addressString);
+    // start agent:
+    m_iface->call("RunAgent");
+
+    //m_iface->call("PairDevice", addressString);
 }
 void PythonConnection::startAgent()
 {

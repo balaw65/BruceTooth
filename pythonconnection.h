@@ -24,6 +24,10 @@ public:
     void quitPython();
     void test();
 
+public slots:
+    void notification(int);
+
+
 
 
 private:

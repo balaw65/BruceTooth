@@ -41,10 +41,15 @@ class Session(object):
                <arg type='i'/>
                <arg type='i'/>
             </signal>
+            <signal name='NotifyHost'>
+                <arg type='i'/>
+            </signal>
+ 
         </interface>
       </node>
    """
    NotifyAgent = signal()
+   NotifyHost  = signal()
 
    def EchoString(self, s):
       """returns whatever is passed to it"""
@@ -66,24 +71,33 @@ class Session(object):
 
    def PairDevice(self, s):
       print ("Attempting to pair device at address: %s" % s)
+ 
       # x = threading.Thread(target=self.AgentThread)
       # x.start()
+      try:
+         # Test verions: results = subprocess.call(['python', 'agent3.py'], shell=False)
+         subprocess.Popen(['python', 'agent.py'], shell=False)
+ 
+         print("From session, run agent called"),
+      except OSError:
+         sys.stderr.write("OSError spawning agent\n");
+      except:
+         sys.stderr.write("Error spawning agent\n");
+
 
       devices = Devices()
       devices.pairDevice(s)
 
    def RunAgent(self):
       print("Run Agent Called")
-      x = threading.Thread(target=AgentThread)
-      x.start()
  
       # spawn agent (shell=True makes it non-blocking, i think):
+      # Non-Blocking, use POpen
       try:
          # Test verions: results = subprocess.call(['python', 'agent3.py'], shell=False)
-         results = subprocess.call(['python', 'agent.py'], shell=False)
+         subprocess.Popen(['python', 'agent.py'], shell=False)
  
-         print("Results of agent: "),
-         print(results)
+         print("From session, run agent called"),
       except OSError:
          sys.stderr.write("OSError spawning agent\n");
       except:
@@ -101,7 +115,8 @@ class Session(object):
    def Test(self):
       print("Test Called")
       # spawn agent:
-      session.NotifyAgent(2, 0)
+      # session.NotifyAgent(2, 0)
+      session.NotifyHost(5)
  
    def Quit(self):
       """removes this object from the DBUS connection and exits"""
@@ -118,6 +133,7 @@ class Session(object):
          sys.stderr.write("OSError spawning agent\n");
       except:
          sys.stderr.write("Error spawning agent\n");
+      print("Result from agent:  %i" % results)
 
 
 
