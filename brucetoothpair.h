@@ -22,6 +22,8 @@ public:
     void scanOn(); // Ok
     void setMainWindow(MainWindow * mw); // Ok
 
+    void powerOn(); // Ok
+    void powerOff(); // Ok
 
 public slots:
     void scanFinished(); // Ok
@@ -40,8 +42,6 @@ private slots:
 
 private:
 
-    void powerOn(); // Ok
-    void powerOff(); // Ok
     void setAgent(); // Ok
     void setDefaultAgent(); // Ok
 

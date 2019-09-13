@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QThread>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -19,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     m_bt.setMainWindow(this);
+    m_pythonConnection->setMainWindow(this);
 
     ui->foundDevicesListWidget->setEnabled(false);
     ui->discoveredDevicesListWidget->setEnabled(false);
@@ -78,6 +80,15 @@ MainWindow::~MainWindow()
 void MainWindow::scanButtonPressed()
 {
    qDebug() << "SCAN BUTTON PRESSED";
+
+   /* Power on and power off the adapter */
+   m_bt.powerOff();
+   QThread::sleep(1);
+   m_bt.powerOn();
+   QThread::sleep(1);
+
+
+
    ui->foundDevicesListWidget->setEnabled(true);
    ui->discoveredDevicesListWidget->clear();
    ui->discoveredDevicesListWidget->setEnabled(false);
@@ -92,7 +103,7 @@ void MainWindow::pairButtonPressed()
     ui->pairButton->setEnabled(false);
     ui->foundDevicesListWidget->setEnabled(false);
     m_pythonConnection->pairDevice(m_selectedDevicesAddress);
-    //this->setCursor(Qt::WaitCursor);
+    this->setCursor(Qt::WaitCursor);
 }
 void MainWindow::unpairButtonPressed()
 {
@@ -105,10 +116,15 @@ void MainWindow::pairingFailed()
     ui->pairedDeviceAddress->setText("PAIRING FAILED");
     this->setCursor(Qt::ArrowCursor);
     ui->pairButton->setEnabled(true);
+    ui->unPairButton->setEnabled(false);
 
 }
-void MainWindow::pairingSucceeded()
+void MainWindow::pairingSucceeded(QString address)
 {
+    ui->pairedDeviceAddress->setText(address);
+    this->setCursor(Qt::ArrowCursor);
+    ui->pairButton->setEnabled(false);
+    ui->unPairButton->setEnabled(true);
 
 }
 void MainWindow::unPairingFailed()
@@ -117,6 +133,7 @@ void MainWindow::unPairingFailed()
     ui->pairedDeviceAddress->setText("PAIRING FAILED");
     this->setCursor(Qt::ArrowCursor);
     ui->pairButton->setEnabled(true);
+    ui->unPairButton->setEnabled(true);
 
 }
 void MainWindow::unPairingSucceeded()

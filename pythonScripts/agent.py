@@ -11,6 +11,7 @@ import dbus.mainloop.glib
 import logging
 import threading
 import time
+import traceback
 
 from devices import Devices
 
@@ -25,17 +26,15 @@ bus = None
 device_obj = None
 dev_path = None
 
-def CountDownThread():
-   '''
-   print("\033[2J\0331;1HKilling agent in:")
-   for i in range(1,10):
-      print("\0332;1H%i seconds" % (10 - i))
-      time.sleep(1)
-   '''
+
+def ExitLoopThread():
    mainloop.quit()
  
 def ask(prompt):
-   x = threading.Thread(target=CountDownThread)
+   obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
+   iface = dbus.Interface(obj,"org.freedesktop.DBus.Introspectable")
+ 
+   x = threading.Thread(target=ExitLoopThread)
    x.start()
    try:
       return raw_input(prompt)
@@ -140,17 +139,6 @@ class Agent(dbus.service.Object):
 
          mainloop.quit()
 
-   '''
-   def CountDownThread(self):
-      print("Killing agent in:")
-      for i in range(1,10):
-         print("%i seconds" % (10 - i))
-         time.sleep(1)
-      mainloop.quit()
-   '''         
-
-
-
 def pair_reply():
    print("FROM AGENT:  Device paired")
    set_trusted(dev_path)
@@ -169,16 +157,10 @@ def pair_error(error):
 if __name__ == '__main__':
    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-   '''
-   print("Agent spawned, creating logger...")
-   format = "%(asctime)s: %(message)s"
-   logging.basicConfig(format=format, level=logging.DEBUG, datefmt="%H:%M:%S")
-   '''
 
    bus = dbus.SystemBus()
 
 
-   '''
    # What the fuck does this do????
    capability = "KeyboardDisplay"
 
@@ -189,7 +171,6 @@ if __name__ == '__main__':
    (options, args) = parser.parse_args()
    if options.capability:
       capability  = options.capability
-   '''
 
 
    path = "/test/agent"
@@ -204,9 +185,6 @@ if __name__ == '__main__':
    manager = dbus.Interface(obj, "org.bluez.AgentManager1")
 
 
-   # TODO: Find any registered agents and remove them:
-
-   '''
    try:
       manager.UnregisterAgent(pathOfBlueToothControl)
    except:
@@ -216,7 +194,6 @@ if __name__ == '__main__':
       manager.UnregisterAgent(path)
    except:
       print("/org/test not registered") 
-   '''
 
    manager.RegisterAgent(path, "") #capability)
    manager.RequestDefaultAgent(path)

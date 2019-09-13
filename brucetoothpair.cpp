@@ -75,7 +75,7 @@ void BruceToothPair::scanFinished()
    qDebug() << __FILE__ << ":" << __FUNCTION__;
    qDebug() << "DONE SCANNING";
 
-   m_discoveryAgent->stop();
+   // m_discoveryAgent->stop();
 
 
 
@@ -127,12 +127,12 @@ void BruceToothPair::deviceFound(QBluetoothDeviceInfo info)
 void BruceToothPair::powerOn()
 {
     qDebug() << __FILE__ << ":" << __FUNCTION__;
-//   m_localDevice->powerOn();
+    m_localDevice->powerOn();
 }
 void BruceToothPair::powerOff()
 {
     qDebug() << __FILE__ << ":" << __FUNCTION__;
-//   m_localDevice->setHostMode(QBluetoothLocalDevice::HostPoweredOff);
+    m_localDevice->setHostMode(QBluetoothLocalDevice::HostPoweredOff);
 }
 void BruceToothPair::setAgent()
 {

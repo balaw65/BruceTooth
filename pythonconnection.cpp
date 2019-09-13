@@ -1,4 +1,7 @@
 #include "pythonconnection.h"
+
+#include "mainwindow.h"
+
 #include <QDebug>
 #include <QDBusReply>
 #include <QtCore/QCoreApplication>
@@ -6,11 +9,21 @@
 PythonConnection::PythonConnection(QObject * obj):QObject(obj)
 {
    qDebug() << __FILE__ << ":" << __FUNCTION__;
+   m_pairedDeviceAddressString = QString("");
 }
 PythonConnection::~PythonConnection()
 {
    qDebug() << __FILE__ << ":" << __FUNCTION__;
 }
+void PythonConnection::setMainWindow(MainWindow * value)
+{
+   m_mainWindow = value;
+}
+MainWindow * PythonConnection::getMainWindow()
+{
+   return  m_mainWindow;
+}
+
 int  PythonConnection::connectInterface()
 {
     m_iface = new QDBusInterface(SERVICE_NAME,  // Service
@@ -57,11 +70,27 @@ QString PythonConnection::getPairedDevices()
 void PythonConnection::notification(int v)
 {
     qDebug() << "NOTIFICATION FROM PYTHON:  " << v;
+    if (v == -1)
+    {
+        m_pairedDeviceAddressString = "ERROR";
+        qWarning() << "AN ERROR WAS SENT FROM PYTHON";
+    }
+    else if (v == 1)
+    {
+        qDebug() << "DEVICE SUCCESSFULLY PAIRED";
+        m_mainWindow->pairingSucceeded(m_pairedDeviceAddressString);
+    }
+    else if (v == 5)
+    {
+        if (m_pairedDeviceAddressString.length() > 0)
+           m_iface->call("PairDevice", m_pairedDeviceAddressString);
+    }
 }
 void PythonConnection::pairDevice(QString addressString)
 {
     // start agent:
     m_iface->call("RunAgent");
+    m_pairedDeviceAddressString = addressString;
 
     //m_iface->call("PairDevice", addressString);
 }

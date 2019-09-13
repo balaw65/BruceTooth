@@ -21,12 +21,6 @@ class Devices:
       objMgr = ObjectManager()
       devices = objMgr.GetAddresses()
 
-#     print "Attempting to find %s" % addressString
-#     print devices[addressString]['Address']
-#     # Form new string:
-#     newPath = "/org/bluez/hci0/dev_%s" % (devices[addressString]['Address'].replace(':','_'))
-#     print "New Path: |%s|" % newPath
-
       newPath = objMgr.DoesDeviceExist(0, addressString)
 
       if newPath != None:

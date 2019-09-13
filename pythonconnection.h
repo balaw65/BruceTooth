@@ -7,7 +7,7 @@
 #include <QtDBus/QDBusInterface>
 
 #define SERVICE_NAME "org.law.pydbus.BruceTooth"
-
+class MainWindow;
 class PythonConnection:public QObject
 {
     Q_OBJECT
@@ -24,14 +24,17 @@ public:
     void quitPython();
     void test();
 
+    void setMainWindow(MainWindow * value);
+    MainWindow * getMainWindow();
+
 public slots:
     void notification(int);
 
 
-
-
 private:
     QDBusInterface * m_iface;
+    QString        m_pairedDeviceAddressString;
+    MainWindow     * m_mainWindow;
 
 
 

@@ -23,7 +23,11 @@ public:
     void scanComplete();
     void numberOfPairedDevices(int quantity);
     void pairingFailed();
-    void pairingSucceeded();
+    void pairingSucceeded(QString address);
+    void setPairedAddressString(QString address)
+    {
+        m_pairedDeviceAddress = address;
+    }
 
 
     void unPairingFailed();
