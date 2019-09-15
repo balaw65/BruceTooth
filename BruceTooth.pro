@@ -37,7 +37,8 @@ HEADERS += \
         pythonconnection.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+        pymessage.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

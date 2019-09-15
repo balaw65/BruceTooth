@@ -41,7 +41,16 @@ class Devices:
             pairedDevices.append(address)
       return pairedDevices
  
-      
+   def returnFirstPairedDevice(self):
+
+      # Find all devices that are paired:
+      pairedDevices = []
+      objMgr = ObjectManager()
+      devices = objMgr.GetAddresses()
+      for address in devices:
+         if devices[address]['Paired']:
+            return address
+      return None 
 
 
 if __name__ == '__main__':

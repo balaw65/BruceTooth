@@ -13,6 +13,8 @@ import threading
 import time
 import traceback
 
+from pydbus import SessionBus
+from pydbus.generic import signal
 from devices import Devices
 
 from optparse import OptionParser
@@ -27,14 +29,25 @@ device_obj = None
 dev_path = None
 
 
+msg_host = None
+
 def ExitLoopThread():
+   time.sleep(1)
    mainloop.quit()
+
+def MessageHostThread(message):
+   obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
+   iface = dbus.Interface(obj,"org.law.pydbus.BruceTooth")
+   iface.MessageHost(message)
+
+
  
 def ask(prompt):
+   '''
    obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
    iface = dbus.Interface(obj,"org.law.pydbus.BruceTooth")
    iface.MessageHost(prompt)
- 
+   ''' 
    x = threading.Thread(target=ExitLoopThread)
    x.start()
    try:
@@ -59,8 +72,65 @@ class Rejected(dbus.DBusException):
 
 
 class Agent(dbus.service.Object):
+   """
+      <node>
+         <interface name='org.law.pydbus.BruceAgent'>
+           <method name='AgentToMessageHost'>
+               <arg type='s' name='s' direction='in'/>
+            </method>
+            <method name='HostToAgentMessage'>
+               <arg type='s' name='s' direction='in'/>
+            </method>
+            <signal name='AgentToNotifyHost'>
+                <arg type='i'/>
+                <arg type='s'/>
+            </signal>
+        </interface>
+      </node>
+   """
+
+   AgentToNotifyHost = signal()
+   m_device = None
+   m_Passkey = None
+ 
    exit_on_release = True
 
+   def AgentToMessageHost(self, s):
+      print ("A message came in from agent and needs to be sent to the host:"),
+      print (s)
+ 
+   def HostToAgentMessage(self, s):
+      print ("A message came in from the host:  "),
+      print (s)
+      if self.m_device != None:
+         if s == 'YES':
+            set_trusted(self.m_device)
+
+            pairedDeviceAddress = dbus.String(Devices().returnFirstPairedDevice())
+
+            print(">>>>> PAIRED DEVICE IS TYPE:  "),
+            print(type(pairedDeviceAddress))
+            print(pairedDeviceAddress)
+
+            agent.AgentToNotifyHost(2, "CC:44:63:20:D0:5F")
+
+            #  FIXME: WHY IS THIS NOT WORKING??? dbus.String(pariredDeviceAddress)) #
+            #agent.AgentToNotifyHost(2, dbus.String(pariredDeviceAddress))
+
+            # No Longer need agent, call exit thread:
+            x = threading.Thread(target=ExitLoopThread)
+            x.start()
+ 
+            return
+         else:
+            msg = "Pairing failed"
+            agent.AgentToNotifyHost(-1, msg)
+            raise Rejected("Device Rejected")
+      else:
+         msg = "Pairing failed"
+         agent.AgentToNotifyHost(-1, msg)
+         raise Rejected("Device Rejected")
+ 
    def set_exit_on_release(self, exit_on_release):
       self.exit_on_release = exit_on_release
 
@@ -83,8 +153,6 @@ class Agent(dbus.service.Object):
    def RequestPinCode(self, device):
       print("FROM AGENT:  RequestPinCode (%s)" % (device))
       set_trusted(device)
-
-
       return ask("FROM AGENT:  Enter PIN Code: ")
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="u")
@@ -104,12 +172,11 @@ class Agent(dbus.service.Object):
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="ou", out_signature="")
    def RequestConfirmation(self, device, passkey):
-      print("FROM AGENT:  RequestConfirmation (%s, %06d)" % (device, passkey))
-      confirm = ask("Confirm passkey (yes/no): ")
-      if (confirm == "yes"):
-         set_trusted(device)
-         return
-      raise Rejected("Passkey doesn't match")
+      self.m_device  = device
+      self.m_Passkey = passkey
+
+      msg = "Confirm passkey %i" % passkey
+      agent.AgentToNotifyHost(1, msg)
 
    @dbus.service.method(AGENT_INTERFACE, in_signature="o", out_signature="")
    def RequestAuthorization(self, device):
@@ -129,7 +196,13 @@ class Agent(dbus.service.Object):
       print("b:", b)
       print("c:", c)
 
-      if   b == 2:
+      if   b == 1:
+         if c == 1:
+            msg_host = 'YES'
+         else:
+            msg_host = 'NO'
+         
+      elif b == 2:
          print("FROM AGENT:  Test Button Pressed")
          obj=dbus.SessionBus().get_object("org.law.pydbus.BruceTooth","/org/law/pydbus/BruceTooth")
          iface = dbus.Interface(obj,"org.law.pydbus.BruceTooth")
@@ -181,6 +254,7 @@ if __name__ == '__main__':
    path = "/test/agent"
    pathOfBlueToothControl = "/org/bluez/agent"
    agent = Agent(bus, path)
+   SessionBus().publish("org.law.pydbus.BruceAgent", agent)
 
    dbus.SessionBus().add_signal_receiver(agent.SignalReceived, dbus_interface='org.law.pydbus.BruceTooth', signal_name='NotifyAgent')
 
@@ -205,3 +279,7 @@ if __name__ == '__main__':
 
    print("Agent is registered")
    mainloop.run()
+
+   print("AGENT DONE")
+ 
+
